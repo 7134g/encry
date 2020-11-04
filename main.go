@@ -1,54 +1,55 @@
 package main
 
 import (
+	"encry/common/ip"
+	"encry/common/logs"
 	"encry/config"
-	"encry/logs"
-	"fmt"
-	"log"
 	"os"
 )
 
 func main() {
-
+	// 欢迎语
 	welcome()
 
+	// 加载配置
 	args := os.Args
 	argLen := len(os.Args)
-
 	if argLen == 0 {
 		loadYaml() // 通过yaml配置启动
 	} else {
 		loadOS(args, argLen) // 通过命令参数启动
 	}
 
-	// 验证
+	// 检查
+	check()
+
+	// 初始化日志
+	logs.Load()
+
+	// 启动
+	Run()
+}
+
+func check() {
+	// 验证log
 	if config.LOCALPORT == "" || config.REMOTEADDRESS == "" {
-		log.Println("args is error")
+		logs.Exit("args is error")
 		return
 	}
 
-	logs.Load()
+	// s和c
+	if config.StartServer == 1 && config.StartClient == 1 {
+		logs.Exit("There are both S and C")
+		return
+	}
 
-	Run()
+	// 检查是否赋值成功
+	if config.REMOTEADDRESS == "" || config.LOCALPORT == "" {
+		logs.Exit("remote or local is nil")
+		return
+	}
 
-}
+	ip.CheckIp(config.REMOTEADDRESS)
+	ip.CheckPort(config.LOCALPORT)
 
-func help() {
-	fmt.Println("+-----------------------------help information--------------------------------+")
-	fmt.Println(`usage: "-listen port1 port2" #example: "gohtran -listen 8888 3389" `)
-	fmt.Println(`       "-tran port1 ip:port2" #example: "gohtran -tran 8888 1.1.1.1:3389" `)
-	fmt.Println(`       "-slave ip1:port1 ip2:port2" #example: "gohtran -slave 127.0.0.1:3389 1.1.1.1:8888" `)
-	fmt.Println(`       "-e enable gzip and aes functionality`)
-	fmt.Println(`       "-aes enable aes functionality, parameters is key, defaults to 16 bits`)
-	fmt.Println(`       "-gzip enable gzip functionality`)
-	fmt.Println(`       "-h -help program documentation`)
-	fmt.Println(`       "-s -silent silent mode,no information is displayed`)
-	fmt.Println(`       "-logs output transferred data to file`)
-	fmt.Println(`============================================================`)
-	fmt.Println("If you see xxxxxx, that means the data channel is established")
-}
-
-func welcome() {
-	log.Println("============== welcome ==================")
-	log.Println("Program execution begins...")
 }

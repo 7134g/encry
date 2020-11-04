@@ -2,6 +2,8 @@ package main
 
 import (
 	"encry/config"
+	"fmt"
+	"log"
 	"strings"
 )
 
@@ -26,8 +28,12 @@ func loadOS(args []string, argLen int) {
 			case "-remote":
 				i++
 				config.REMOTEADDRESS = args[i]
-			case "-s": // 静默
+			case "-m", "-mute": // 静默
 				config.LOGSILENT = 1
+			case "-c", "-client":
+				config.StartServer = 1
+			case "-s", "-server":
+				config.StartClient = 1
 			case "-h":
 				help()
 			}
@@ -37,5 +43,17 @@ func loadOS(args []string, argLen int) {
 }
 
 func loadYaml() {
+	config.LoadYaml()
+}
 
+func help() {
+	fmt.Println("+-----------------------------help information--------------------------------+")
+	fmt.Println(`usage: "-listen port1 port2" #example: "" `)
+	fmt.Println(`============================================================`)
+	fmt.Println("If you see xxxxxx, that means the data channel is established")
+}
+
+func welcome() {
+	log.Println("============== welcome ==================")
+	log.Println("Program execution begins...")
 }
